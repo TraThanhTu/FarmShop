@@ -2,8 +2,10 @@ import React, { useContext } from 'react';
 import './CartItems.css';
 import { ShopContext } from '../../Context/ShopContext';
 import remove_icon from '../../assets/remove_icon.png';
+const ROUNDED_NUMBER = 2;
 const CartItems = () => {
-  const { all_products, cartItems, removeFromCart } = useContext(ShopContext);
+  const { all_products, cartItems, removeFromCart, getTotalCartAmount } =
+    useContext(ShopContext);
   return (
     <div className="cartitems">
       <div className="cartitems-format-main">
@@ -16,15 +18,15 @@ const CartItems = () => {
       </div>
       <hr />
 
-      {all_products.map((e) => {
+      {all_products.map((e, index) => {
         if (cartItems[e.id] > 0) {
           return (
-            <div className="cartitems-format cartitems-format-main">
+            <div className="cartitems-format cartitems-format-main" key={index}>
               <img src={e.image} alt="" className="carticon-product-icon" />
               <p>{e.name}</p>
               <p>${e.new_price}</p>
               <button className="cartitems-quantity">{cartItems[e.id]}</button>
-              <p>${e.new_price * cartItems[e.id]}</p>
+              <p>${(e.new_price * cartItems[e.id]).toFixed(ROUNDED_NUMBER)}</p>
               <img
                 src={remove_icon}
                 className="cartitems-remove-icon"
@@ -44,7 +46,7 @@ const CartItems = () => {
           <div>
             <div className="cartitems-total-item">
               <p>Subtatal</p>
-              <p>${0}</p>
+              <p>${getTotalCartAmount().toFixed(ROUNDED_NUMBER)}</p>
             </div>
             <hr />
             <div className="cartitems-total-item">
@@ -54,7 +56,7 @@ const CartItems = () => {
             <hr />
             <div className="cartitems-total-item">
               <h3>Total</h3>
-              <h3>${0}</h3>
+              <h3>${getTotalCartAmount().toFixed(ROUNDED_NUMBER)}</h3>
             </div>
           </div>
           <button>PROCEED TO CHECKOUT</button>
