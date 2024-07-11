@@ -7,6 +7,7 @@ const Hero = () => {
       <div className="hero-left">
         <h2>New arraivals only</h2>
         <div>
+          <p>New</p>
           <p>collections</p>
           <p>for everyone</p>
         </div>
