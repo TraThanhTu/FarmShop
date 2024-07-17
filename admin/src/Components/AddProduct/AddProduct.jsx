@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './AddProduct.css';
 import upload_area from '../../assets/upload_area.svg';
+import axios from 'axios';
+import { url_admin } from '../../service';
 const AddProduct = () => {
   const [image, setImage] = useState(false);
   const [productDetails, setProductDetails] = useState({
@@ -12,7 +14,6 @@ const AddProduct = () => {
   });
   const imageHandler = (e) => {
     setImage(e.target.files[0]);
-    console.log(image);
   };
   const changeHandler = (e) => {
     setProductDetails({
@@ -21,7 +22,33 @@ const AddProduct = () => {
     });
   };
   const addProduct = async () => {
-    console.log(productDetails);
+    let resData;
+    let product = productDetails;
+
+    let formData = new FormData();
+
+    formData.append('product', image);
+    try {
+      const uploadRespone = await axios.post(`${url_admin}/upload`, formData);
+      resData = uploadRespone.data;
+      console.log(resData);
+      if (resData) {
+        product.image = resData.image_url;
+        console.log(product);
+        const addProductResponse = await axios.post(
+          `${url_admin}/addproduct`,
+          product
+        );
+        if (addProductResponse.data) {
+          alert('Product Added');
+        } else {
+          alert('Failed');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An error occured while adding the product.');
+    }
   };
   return (
     <div className="add-product">
