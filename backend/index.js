@@ -7,6 +7,7 @@ const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const productRoute = require('./routes/productRoute');
+const userRoute = require('./routes/userRoute');
 dotenv.config();
 
 app.use(express.json());
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
   res.send('App is running');
 });
 app.use('/api', productRoute);
+app.use('/api', userRoute);
 
 //Img Storage Engine
 
