@@ -1,5 +1,6 @@
 const productModel = require('../models/productModel');
-
+const jwt = require('jsonwebtoken');
+const userModel = require('../models/userModel');
 const addProduct = async (req, res) => {
   let products = await productModel.find({});
   console.log('=================================', products);
@@ -41,8 +42,95 @@ const removeProduct = async (req, res) => {
 
 const showAllProducts = async (req, res) => {
   let products = await productModel.find({});
-  console.log('=============== All Products Fetched');
-  res.send(products);
+  if (products) {
+    console.log('=============== All Products Fetched');
+    res.send(products);
+  } else {
+    res.send('An Error occur');
+  }
 };
 
-module.exports = { addProduct, removeProduct, showAllProducts };
+const newCollectionProduct = async (req, res) => {
+  let products = await productModel.find({});
+
+  if (products) {
+    let newCollection = products.slice(1).slice(-8);
+    console.log('newcollection Fetched');
+    res.send(newCollection);
+  } else {
+    res.send('An Error occur');
+  }
+};
+
+const popularFruit = async (req, res) => {
+  let products = await productModel.find({ category: 'fruit' });
+  let popular_fruit = products.slice(0, 4);
+  console.log('Popular in fruit fetched');
+  res.send(popular_fruit);
+};
+
+const fetchUser = async (req, res, next) => {
+  const token = req.header('auth-token');
+  if (!token) {
+    res.status(401).send({ errors: 'Please authenticate using valid token' });
+  } else {
+    try {
+      const data = jwt.verify(token, 'secret_ecom');
+      req.user = data.user;
+      next();
+    } catch (error) {
+      res
+        .status(404)
+        .send({ errors: 'Please authenticate using a valid token' });
+    }
+  }
+};
+const addToCart = async (req, res) => {
+  await fetchUser(req, res, async () => {
+    console.log('==========add', req.body.itemId);
+
+    let userData = await userModel.findOne({ _id: req.user.id });
+
+    userData.cartData[req.body.itemId] += 1;
+    await userModel.findOneAndUpdate(
+      { _id: req.user.id },
+      { cartData: userData.cartData }
+    );
+    res.send('Added');
+  });
+};
+
+const removeFromCart = async (req, res) => {
+  await fetchUser(req, res, async () => {
+    console.log('==========remove', req.body.itemId);
+    let userData = await userModel.findOne({ _id: req.user.id });
+    console.log('===================userData', userData);
+    if (userData.cartData[req.body.itemId] > 0) {
+      userData.cartData[req.body.itemId] -= 1;
+      await userModel.findOneAndUpdate(
+        { _id: req.user.id },
+        { cartData: userData.cartData }
+      );
+      res.send('Removed');
+    }
+  });
+};
+
+const getCart = async (req, res) => {
+  await fetchUser(req, res, async () => {
+    console.log('==============getCart');
+    let userData = await userModel.findOne({ _id: req.user.id });
+    res.json(userData.cartData);
+  });
+};
+
+module.exports = {
+  addProduct,
+  removeProduct,
+  showAllProducts,
+  newCollectionProduct,
+  popularFruit,
+  addToCart,
+  removeFromCart,
+  getCart,
+};

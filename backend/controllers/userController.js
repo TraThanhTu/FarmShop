@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const signUp = async (req, res) => {
   let check = await userModel.findOne({ email: req.body.email });
   if (check) {
-    return res.status(400).json({
+    return res.json({
       success: false,
       errors: 'existing user found with same email address',
     });
